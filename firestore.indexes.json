@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "salas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "finishedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "salas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "gameMode", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

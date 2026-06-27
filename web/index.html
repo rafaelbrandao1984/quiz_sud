@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Liahona Quiz — estudo e disputas sobre temas SUD">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Liahona Quiz">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Liahona Quiz</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- App Check debug: acesse ?appCheckDebug=1, copie o token do console do navegador
+       e registre em Firebase Console → App Check → Manage debug tokens -->
+  <script>
+    if (new URLSearchParams(window.location.search).has('appCheckDebug')) {
+      self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

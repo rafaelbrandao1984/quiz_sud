@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "618215022170",
+    "project_id": "liahona-quiz",
+    "storage_bucket": "liahona-quiz.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618215022170:android:996fb0e1e8d66f5c6cc263",
+        "android_client_info": {
+          "package_name": "com.example.quiz_sud"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjFMnhE7ZVCzHC5GvSLW1MIrgC_RqcqaY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

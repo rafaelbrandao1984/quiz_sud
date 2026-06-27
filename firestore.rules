@@ -1,0 +1,247 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /perguntas/{questionId} {
+      allow read, write: if false;
+    }
+
+    match /salas/{roomId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidRoomCreate();
+      allow update: if isSignedIn() && isValidRoomUpdate();
+      allow delete: if false;
+
+      match /server/{docId} {
+        allow read, write: if false;
+      }
+    }
+
+    match /_rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
+    match /_meta/{docId} {
+      allow read, write: if false;
+    }
+  }
+
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isRoomPlayer(data) {
+    let size = data.players.size();
+    return (size > 0 && data.players[0].id == request.auth.uid)
+      || (size > 1 && data.players[1].id == request.auth.uid)
+      || (size > 2 && data.players[2].id == request.auth.uid)
+      || (size > 3 && data.players[3].id == request.auth.uid)
+      || (size > 4 && data.players[4].id == request.auth.uid)
+      || (size > 5 && data.players[5].id == request.auth.uid)
+      || (size > 6 && data.players[6].id == request.auth.uid)
+      || (size > 7 && data.players[7].id == request.auth.uid)
+      || (size > 8 && data.players[8].id == request.auth.uid)
+      || (size > 9 && data.players[9].id == request.auth.uid);
+  }
+
+  function isLightningPlaying(data) {
+    return data.status == 'playing'
+      && (data.gameMode == 'lightning' || data.gameMode == 'duel');
+  }
+
+  function isCurrentTurnPlayer(data) {
+    let index = data.currentPlayerTurnIndex;
+    return (index == 0 && data.players.size() > 0 && data.players[0].id == request.auth.uid)
+      || (index == 1 && data.players.size() > 1 && data.players[1].id == request.auth.uid)
+      || (index == 2 && data.players.size() > 2 && data.players[2].id == request.auth.uid)
+      || (index == 3 && data.players.size() > 3 && data.players[3].id == request.auth.uid)
+      || (index == 4 && data.players.size() > 4 && data.players[4].id == request.auth.uid)
+      || (index == 5 && data.players.size() > 5 && data.players[5].id == request.auth.uid)
+      || (index == 6 && data.players.size() > 6 && data.players[6].id == request.auth.uid)
+      || (index == 7 && data.players.size() > 7 && data.players[7].id == request.auth.uid)
+      || (index == 8 && data.players.size() > 8 && data.players[8].id == request.auth.uid)
+      || (index == 9 && data.players.size() > 9 && data.players[9].id == request.auth.uid);
+  }
+
+  function isValidGameMode(mode) {
+    return mode in ['lightning', 'duel', 'turn_based'];
+  }
+
+  function isValidCategoryTitle(title) {
+    return title is string
+      && title.size() > 0
+      && title.size() <= 80
+      && title in [
+        'Obras Padrão',
+        'História da Igreja',
+        'História da Igreja no Brasil',
+        'Desafio Geral',
+      ];
+  }
+
+  function isValidPlayerName(name) {
+    return name is string && name.size() > 0 && name.size() <= 40;
+  }
+
+  function isValidRoomCreate() {
+    let data = request.resource.data;
+    return data.hostId == request.auth.uid
+      && data.roomId is string
+      && data.roomId.size() == 6
+      && data.status == 'waiting'
+      && data.gameMode is string
+      && isValidGameMode(data.gameMode)
+      && data.categoryTitle is string
+      && isValidCategoryTitle(data.categoryTitle)
+      && data.phase is string
+      && data.phase == 'question'
+      && data.players is list
+      && data.players.size() == 1
+      && data.players[0].id == request.auth.uid
+      && isValidPlayerName(data.players[0].name)
+      && data.players.size() <= 10
+      && data.questionCount is int
+      && data.questionCount >= 1
+      && data.questionCount <= 50
+      && data.maxTimeSeconds is int
+      && data.maxTimeSeconds >= 60
+      && data.maxTimeSeconds <= 7200
+      && data.questionTimeSeconds is int
+      && data.questionTimeSeconds >= 10
+      && data.questionTimeSeconds <= 120
+      && data.autoAdvanceSeconds is int
+      && data.autoAdvanceSeconds >= 5
+      && data.autoAdvanceSeconds <= 60
+      && data.createdAt is timestamp
+      && data.currentQuestionIndex is int
+      && data.currentQuestionIndex == 0
+      && data.currentPlayerTurnIndex is int
+      && data.currentPlayerTurnIndex == 0
+      && data.allAnswersCollected is bool
+      && data.allAnswersCollected == false;
+  }
+
+  function isValidRoomUpdate() {
+    let data = request.resource.data;
+    let prev = resource.data;
+
+    return data.hostId == prev.hostId
+      && data.roomId == prev.roomId
+      && data.players is list
+      && data.players.size() >= 1
+      && data.players.size() <= 10
+      && data.questionCount is int
+      && data.questionCount >= 1
+      && data.questionCount <= 50
+      && data.status in ['waiting', 'playing', 'finished']
+      && (
+        isJoinUpdate(prev, data)
+        || isReactionUpdate(prev, data)
+        || isTurnCompleteUpdate(prev, data)
+        || isTurnAdvanceUpdate(prev, data)
+        || isTurnScoreUpdate(prev, data)
+      );
+  }
+
+  function isJoinUpdate(prev, data) {
+    let size = prev.players.size();
+    return prev.status == 'waiting'
+      && data.status == 'waiting'
+      && data.players.size() == size + 1
+      && !isRoomPlayer(prev)
+      && (
+        (size == 0 && data.players[0].id == request.auth.uid && isValidPlayerName(data.players[0].name))
+        || (size == 1 && data.players[1].id == request.auth.uid && isValidPlayerName(data.players[1].name))
+        || (size == 2 && data.players[2].id == request.auth.uid && isValidPlayerName(data.players[2].name))
+        || (size == 3 && data.players[3].id == request.auth.uid && isValidPlayerName(data.players[3].name))
+        || (size == 4 && data.players[4].id == request.auth.uid && isValidPlayerName(data.players[4].name))
+        || (size == 5 && data.players[5].id == request.auth.uid && isValidPlayerName(data.players[5].name))
+        || (size == 6 && data.players[6].id == request.auth.uid && isValidPlayerName(data.players[6].name))
+        || (size == 7 && data.players[7].id == request.auth.uid && isValidPlayerName(data.players[7].name))
+        || (size == 8 && data.players[8].id == request.auth.uid && isValidPlayerName(data.players[8].name))
+        || (size == 9 && data.players[9].id == request.auth.uid && isValidPlayerName(data.players[9].name))
+      );
+  }
+
+  function isReactionUpdate(prev, data) {
+    return isLightningPlaying(prev)
+      && isRoomPlayer(prev)
+      && data.diff(prev).affectedKeys().hasOnly(['activeReactions']);
+  }
+
+  function isTurnCompleteUpdate(prev, data) {
+    return prev.gameMode == 'turn_based'
+      && prev.status == 'playing'
+      && isCurrentTurnPlayer(prev)
+      && prev.allAnswersCollected == false
+      && data.allAnswersCollected == true
+      && data.answeredPlayerIds.size() == 1
+      && data.answeredPlayerIds[0] == request.auth.uid
+      && data.currentTurnAnswerIndex is int
+      && data.currentTurnAnswerIndex >= 0
+      && data.currentTurnAnswerIndex <= 3
+      && data.diff(prev).affectedKeys()
+          .hasOnly(['allAnswersCollected', 'answeredPlayerIds', 'currentTurnAnswerIndex']);
+  }
+
+  function isTurnAdvanceUpdate(prev, data) {
+    let nextTurn = (prev.currentPlayerTurnIndex + 1) % prev.players.size();
+    return prev.gameMode == 'turn_based'
+      && prev.status == 'playing'
+      && isCurrentTurnPlayer(prev)
+      && prev.allAnswersCollected == true
+      && data.allAnswersCollected == false
+      && data.answeredPlayerIds.size() == 0
+      && data.currentQuestionIndex == prev.currentQuestionIndex + 1
+      && data.currentPlayerTurnIndex == nextTurn
+      && data.diff(prev).affectedKeys().hasOnly([
+        'currentQuestionIndex',
+        'currentPlayerTurnIndex',
+        'allAnswersCollected',
+        'answeredPlayerIds',
+        'currentTurnAnswerIndex',
+      ])
+      && !('currentTurnAnswerIndex' in data);
+  }
+
+  function isTurnScoreUpdate(prev, data) {
+    return prev.gameMode == 'turn_based'
+      && prev.status == 'playing'
+      && isRoomPlayer(prev)
+      && data.diff(prev).affectedKeys().hasOnly(['players'])
+      && data.players.size() == prev.players.size()
+      && onlyOwnScoreIncreasedByOne(prev.players, data.players);
+  }
+
+  function onlyOwnScoreIncreasedByOne(before, after) {
+    return before.size() == after.size()
+      && checkPlayerAt(before, after, 0)
+      && checkPlayerAt(before, after, 1)
+      && checkPlayerAt(before, after, 2)
+      && checkPlayerAt(before, after, 3)
+      && checkPlayerAt(before, after, 4)
+      && checkPlayerAt(before, after, 5)
+      && checkPlayerAt(before, after, 6)
+      && checkPlayerAt(before, after, 7)
+      && checkPlayerAt(before, after, 8)
+      && checkPlayerAt(before, after, 9);
+  }
+
+  function checkPlayerAt(before, after, idx) {
+    return idx >= before.size()
+      || (
+        before[idx].id == after[idx].id
+        && before[idx].name == after[idx].name
+        && scoreChangeValid(before[idx], after[idx])
+      );
+  }
+
+  function scoreChangeValid(before, after) {
+    return before.score == after.score
+      || (
+        before.id == request.auth.uid
+        && after.id == request.auth.uid
+        && after.score == before.score + 1
+      );
+  }
+}

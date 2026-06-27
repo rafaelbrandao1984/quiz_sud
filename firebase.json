@@ -1,0 +1,56 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "liahona-quiz",
+          "appId": "1:618215022170:android:996fb0e1e8d66f5c6cc263",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "liahona-quiz",
+          "configurations": {
+            "android": "1:618215022170:android:996fb0e1e8d66f5c6cc263",
+            "ios": "1:618215022170:ios:e43eb7da340bbb456cc263",
+            "macos": "1:618215022170:ios:e43eb7da340bbb456cc263",
+            "web": "1:618215022170:web:8b7fa977cafffb2f6cc263",
+            "windows": "1:618215022170:web:537cc8e931b75dda6cc263"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}
