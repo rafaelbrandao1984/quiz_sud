@@ -9,22 +9,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Passo 1: Instalar o Flutter
+      # 1. Instala o Flutter do zero no servidor do GitHub
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           
-      # Passo 2: Instalar dependências
+      # 2. Baixa as dependências
       - run: flutter pub get
       
-      # Passo 3: Build do Web
+      # 3. COMPILA o código novo (É isso aqui que garante que sua alteração visual vá para o ar)
       - run: flutter build web --release
       
-      # Passo 4: Deploy para o Firebase
+      # 4. Faz o upload da nova versão para o Firebase
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LIAHONA_QUIZ }}
           channelId: live
           projectId: liahona-quiz
-          # Removemos o channelId: live para ver se ele para de tentar fazer o "release" forçado
